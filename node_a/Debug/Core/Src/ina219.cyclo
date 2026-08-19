@@ -1,0 +1,2 @@
+../Core/Src/ina219.c:3:9:INA219_Init	1
+../Core/Src/ina219.c:13:7:INA219_ReadCurrent	1

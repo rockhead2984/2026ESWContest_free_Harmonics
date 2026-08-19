@@ -1,0 +1,6 @@
+../Core/Src/vl53l0x_platform.c:92:15:VL53L0X_LockSequenceAccess	1
+../Core/Src/vl53l0x_platform.c:98:15:VL53L0X_UnlockSequenceAccess	1
+../Core/Src/vl53l0x_platform.c:105:15:VL53L0X_WriteMulti	3
+../Core/Src/vl53l0x_platform.c:126:15:VL53L0X_ReadMulti	3
+../Core/Src/vl53l0x_platform.c:153:15:VL53L0X_UpdateByte	4
+../Core/Src/vl53l0x_platform.c:184:15:VL53L0X_PollingDelay	1
