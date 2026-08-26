@@ -80,14 +80,14 @@ const osThreadAttr_t CANTxTask_attributes = {
 osThreadId_t MQTTTaskHandle;
 const osThreadAttr_t MQTTTask_attributes = {
   .name = "MQTTTask",
-  .stack_size = 256 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for FeedbackTask */
 osThreadId_t FeedbackTaskHandle;
 const osThreadAttr_t FeedbackTask_attributes = {
   .name = "FeedbackTask",
-  .stack_size = 256 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 
@@ -206,6 +206,10 @@ void StartSensorTask(void *argument)
     sprintf(msg, "Distance: %d mm\r\n", RangingData.RangeMilliMeter);
     HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
     osDelay(200);
+
+    char uart_msg[50];
+    sprintf(uart_msg, "%d\n", RangingData.RangeMilliMeter);
+    HAL_UART_Transmit(&huart1, (uint8_t*)uart_msg, strlen(uart_msg), 100);
   }
   /* USER CODE END StartSensorTask */
 }
@@ -238,10 +242,26 @@ void StartCANTxTask(void *argument)
 void StartMQTTTask(void *argument)
 {
   /* USER CODE BEGIN StartMQTTTask */
-  /* Infinite loop */
+  uint8_t resp[100] = {0};
+
+  osDelay(5000);
+
+  // AT 전송
+  HAL_UART_Transmit(&huart1, (uint8_t*)"AT\r\n", 4, 1000);
+  osDelay(2000);  // 더 기다리기
+  HAL_UART_Receive(&huart1, resp, 50, 3000);
+
+  // 결과 출력
+  char msg[50];
+  char hex[200];
+  sprintf(hex, "HEX: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+          resp[0], resp[1], resp[2], resp[3], resp[4],
+          resp[5], resp[6], resp[7], resp[8], resp[9]);
+  HAL_UART_Transmit(&huart2, (uint8_t*)hex, strlen(hex), 100);
+
   for(;;)
   {
-    osDelay(1);
+    osDelay(1000);
   }
   /* USER CODE END StartMQTTTask */
 }
