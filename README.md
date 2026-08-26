@@ -47,8 +47,11 @@ MySQL DB
 
 escalator-control-system/
 ├── node_a/ # STM32 Node A 펌웨어 (CubeIDE)
+
 ├── esp8266/ # ESP8266 Arduino 코드
+
 ├── server/ # Python 서버 (Flask + MQTT + MySQL)
+
 └── README.md
 
 
