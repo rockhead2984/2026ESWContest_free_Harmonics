@@ -46,6 +46,7 @@ MySQL DB
 ## 📁 레포지토리 구조
 
 escalator-control-system/
+
 ├── node_a/ # STM32 Node A 펌웨어 (CubeIDE)
 
 ├── esp8266/ # ESP8266 Arduino 코드
