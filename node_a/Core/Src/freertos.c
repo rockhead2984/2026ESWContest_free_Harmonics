@@ -53,6 +53,11 @@
 extern I2C_HandleTypeDef hi2c1;
 extern UART_HandleTypeDef huart2;
 VL53L0X_RangingMeasurementData_t RangingData;
+extern CAN_HandleTypeDef hcan1;
+uint8_t congestion_flag = 0;
+uint8_t distance_high_count = 0;
+uint8_t distance_congestion_flag = 0;
+float received_current = 0.0f;
 
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
@@ -210,6 +215,22 @@ void StartSensorTask(void *argument)
     char uart_msg[50];
     sprintf(uart_msg, "%d\n", RangingData.RangeMilliMeter);
     HAL_UART_Transmit(&huart1, (uint8_t*)uart_msg, strlen(uart_msg), 100);
+
+    // CAN으로 거리값 전송
+    CAN_TxHeaderTypeDef TxHeader;
+    uint8_t TxData[2];
+    uint32_t TxMailbox;
+
+    TxHeader.StdId = 0x123;
+    TxHeader.RTR = CAN_RTR_DATA;
+    TxHeader.IDE = CAN_ID_STD;
+    TxHeader.DLC = 2;
+    TxHeader.TransmitGlobalTime = DISABLE;
+
+    TxData[0] = (RangingData.RangeMilliMeter >> 8) & 0xFF;
+    TxData[1] = RangingData.RangeMilliMeter & 0xFF;
+
+    HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox);
   }
   /* USER CODE END StartSensorTask */
 }
@@ -241,31 +262,22 @@ void StartCANTxTask(void *argument)
 /* USER CODE END Header_StartMQTTTask */
 void StartMQTTTask(void *argument)
 {
-  /* USER CODE BEGIN StartMQTTTask */
-  uint8_t resp[100] = {0};
-
-  osDelay(5000);
-
-  // AT 전송
-  HAL_UART_Transmit(&huart1, (uint8_t*)"AT\r\n", 4, 1000);
-  osDelay(2000);  // 더 기다리기
-  HAL_UART_Receive(&huart1, resp, 50, 3000);
-
-  // 결과 출력
-  char msg[50];
-  char hex[200];
-  sprintf(hex, "HEX: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
-          resp[0], resp[1], resp[2], resp[3], resp[4],
-          resp[5], resp[6], resp[7], resp[8], resp[9]);
-  HAL_UART_Transmit(&huart2, (uint8_t*)hex, strlen(hex), 100);
+/* USER CODE BEGIN StartMQTTTask */
+  osDelay(3000);
 
   for(;;)
   {
-    osDelay(1000);
+      char uart_msg[100];
+      sprintf(uart_msg, "DIST:%d,CONG:%d,CURR:%d,AMP:%d\n",
+              RangingData.RangeMilliMeter,
+              distance_congestion_flag,
+              congestion_flag,
+              (int)(received_current * 10));
+      HAL_UART_Transmit(&huart1, (uint8_t*)uart_msg, strlen(uart_msg), 100);
+      osDelay(1000);
   }
   /* USER CODE END StartMQTTTask */
 }
-
 /* USER CODE BEGIN Header_StartFeedbackTask */
 /**
 * @brief Function implementing the FeedbackTask thread.
@@ -278,9 +290,23 @@ void StartFeedbackTask(void *argument)
   /* USER CODE BEGIN StartFeedbackTask */
   for(;;)
   {
-    if (RangingData.RangeMilliMeter < 300) {
-      HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_SET);
+    if (RangingData.RangeMilliMeter < 300 && RangingData.RangeMilliMeter > 0) {
+      distance_high_count++;
+      if (distance_high_count >= 15) {
+        distance_congestion_flag = 1;
+        // 삐삐삐 소리
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_SET);
+        osDelay(100);
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_RESET);
+        osDelay(100);
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_SET);
+        osDelay(100);
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_RESET);
+        osDelay(500);
+      }
     } else {
+      distance_high_count = 0;
+      distance_congestion_flag = 0;
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_RESET);
     }
     osDelay(100);
@@ -290,6 +316,22 @@ void StartFeedbackTask(void *argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+    CAN_RxHeaderTypeDef RxHeader;
+    uint8_t RxData[8];
+    HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData);
 
+    if (RxHeader.StdId == 0x456) {
+        uint16_t current_int = (RxData[0] << 8) | RxData[1];
+        received_current = current_int / 10.0f;
+
+        if (received_current > 150.0f) {
+            congestion_flag = 1;
+        } else {
+            congestion_flag = 0;
+        }
+    }
+}
 /* USER CODE END Application */
 

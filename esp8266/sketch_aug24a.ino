@@ -1,9 +1,9 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char* ssid = "U+NetDF47";
-const char* password = "010B033558";
-const char* mqtt_server = "192.168.123.100";
+const char* ssid = "(주)한국전력";
+const char* password = "rockhead2984";
+const char* mqtt_server = "10.90.93.254";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -36,7 +36,7 @@ void loop() {
   while (Serial.available()) {
     char c = Serial.read();
     if (c == '\n') {
-      client.publish("escalator/distance", inputString.c_str());
+      client.publish("escalator/data", inputString.c_str());
       inputString = "";
     } else {
       inputString += c;

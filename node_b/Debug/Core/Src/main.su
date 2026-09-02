@@ -1,0 +1,10 @@
+../Core/Src/main.c:71:5:_write	24	static
+../Core/Src/main.c:80:6:Read_INA219	32	static
+../Core/Src/main.c:115:5:main	56	static
+../Core/Src/main.c:243:6:SystemClock_Config	88	static
+../Core/Src/main.c:285:13:MX_CAN1_Init	8	static
+../Core/Src/main.c:322:13:MX_I2C1_Init	8	static
+../Core/Src/main.c:356:13:MX_USART2_UART_Init	8	static
+../Core/Src/main.c:389:13:MX_GPIO_Init	40	static
+../Core/Src/main.c:426:6:HAL_CAN_RxFifo0MsgPendingCallback	80	static
+../Core/Src/main.c:472:6:Error_Handler	4	static,ignoring_inline_asm

@@ -65,7 +65,7 @@ main-build: node_a.elf secondary-outputs
 
 # Tool invocations
 node_a.elf node_a.map: $(OBJS) $(USER_OBJS) C:\ST\STM32CubeIDE_2.2.0\node_a\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "node_a.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\ST\STM32CubeIDE_2.2.0\node_a\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="node_a.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "node_a.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\ST\STM32CubeIDE_2.2.0\node_a\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="node_a.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

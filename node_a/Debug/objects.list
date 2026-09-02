@@ -1,3 +1,4 @@
+"./Core/Src/can.o"
 "./Core/Src/dma.o"
 "./Core/Src/freertos.o"
 "./Core/Src/gpio.o"
@@ -22,6 +23,7 @@
 "./Core/Src/vl53l0x_platform.o"
 "./Core/Startup/startup_stm32f446retx.o"
 "./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o"
+"./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_can.o"
 "./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.o"
 "./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.o"
 "./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.o"
